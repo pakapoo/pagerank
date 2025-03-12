@@ -120,8 +120,7 @@ The system was now ready to process large-scale distributed data using Spark on 
 2. `spark-env.sh` specifies three environment variables. These configure Spark’s runtime environment: PYSPARK_PYTHON and PYSPARK_DRIVER_PYTHON specify Python 3 as the interpreter for both PySpark executors and drivers, while SPARK_LOCAL_DIR sets the directory (/data/tmp) for temporary storage during Spark execution.
 
 ### Spark tuning
-
-####Partition
+#### Partition
 * Input partition number is decided by File size vs Max partition size (may split or merge)
   * initial partition usually don’t have much impact on total time, because mostly dominated by future wide transformation iterations
 * Coalesce, Repartition
@@ -131,7 +130,7 @@ The system was now ready to process large-scale distributed data using Spark on 
   * size: 100~500 MB
   * number: machine * cores * (2~4 multiples)
 
-####Shuffle partition
+#### Shuffle partition
 * spark.sql.shuffle.partitions: how many output partitions you will have after doing wide transformations (join / groupby) on Dataframes/Datasets
 * Too large: more total shuffle
 * Too small: not using all cores
@@ -142,11 +141,9 @@ The system was now ready to process large-scale distributed data using Spark on 
 Caching/Persistence
 * good for reused table, especially when joining
 * will store in memory after the first computation
-
-For pagerank: <p>
+* **For pagerank:** <p>
 Impact of Persisting edges <p>
-Persisting the edges in memory significantly enhances performance, and we believe this is to be expected. This is because we perform multiple operations on the edges later in the algorithm, and having the DataFrame readily available in memory reduces the need for repeated computations or disk accesses. By essentially caching the edges, we observe a substantial reduction in both shuffleRead and shuffleWrite operations compared to the default scenario. This improvement is due to the reduced need for data redistribution across nodes during shuffle operations. Overall, persisting edges proves to be a crucial optimization step in our workflow. It ensures that frequently used data is always accessible, leading to faster execution times and improved efficiency.
-
+Persisting the edges in memory significantly enhances performance, and we believe this is to be expected. This is because we perform multiple operations on the edges later in the algorithm, and having the DataFrame readily available in memory reduces the need for repeated computations or disk accesses. By essentially caching the edges, we observe a substantial reduction in both shuffleRead and shuffleWrite operations compared to the default scenario. This improvement is due to the reduced need for data redistribution across nodes during shuffle operations. Overall, persisting edges proves to be a crucial optimization step in our workflow. It ensures that frequently used data is always accessible, leading to faster execution times and improved efficiency. <p>
 Impact of Persisting ranks <p>
 In contrast, persisting ranks does not offer any significant benefits. This is understandable given that we recalculate a new ranks DF in every iteration of the algorithm. Since the ranks is updated dynamically this way, storing it in memory does not provide any lasting advantage. Each iteration requires fresh calculations based on the updated data, making persistence unnecessary in this context. This, we believe, is the reason there is no notable performance improvements from caching ranks.
 
